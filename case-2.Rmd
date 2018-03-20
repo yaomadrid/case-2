@@ -1,0 +1,53 @@
+---
+title: "case-2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(dplyr)
+
+rockyDB <- read_csv("R/BUS256/Data/rockyDB.csv")
+##Part 1
+##a
+colnames(rockyDB)[2] <- 'Rocky1'
+colnames(rockyDB)[3] <- 'Rocky2'
+colnames(rockyDB)[4] <- 'Rocky3'
+colnames(rockyDB)[5] <- 'Rocky4'
+colnames(rockyDB)[6] <- 'Rocky5'
+
+##b
+
+##c
+
+rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, 'NA')
+rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, 'NA')
+rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, 'NA')
+rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, 'NA')
+rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, 'NA')
+
+
+##Part 2
+##a
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
