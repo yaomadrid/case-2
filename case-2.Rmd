@@ -7,7 +7,7 @@ output: html_document
 library(readr)
 library(dplyr)
 
-rockyDB <- read_csv("R/BUS256/Data/rockyDB.csv")
+rockyDB <- read_csv("rockyDB.csv")
 ##Part 1
 ##a
 colnames(rockyDB)[2] <- 'Rocky1'
@@ -19,12 +19,11 @@ colnames(rockyDB)[6] <- 'Rocky5'
 ##b
 
 ##c
-
-rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, 'NA')
-rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, 'NA')
-rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, 'NA')
-rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, 'NA')
-rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, 'NA')
+rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, NA)
+rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, NA)
+rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, NA)
+rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, NA)
+rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, NA)
 
 
 ##Part 2
@@ -32,22 +31,62 @@ rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, 'NA')
 
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Part 2
+#a#
+```{r}
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+install.packages("corrplot")
+library("corrplot")
+CorMovie<-cor(rockyDB[,2:6],use="pairwise.complete.obs")
+round(CorMovie, digits = 3)
+corrplot(CorMovie,order="hclust")
+```
+According to the correlation plot, Rocky2, Rocky 3 and Rocky 4 are within a cluster and the color of their dots are darkest.
+Therefore, these movies are most similar. Also, the correlation coefficient of ratings between these three movies are above 0.6.
+Rocky 1 is most different from the others, the coefficients of ratings between Rocky 1 and other movies are relative low, compared with others. And the correlation plot also indicates the same conclution.
 
-```{r cars}
-summary(cars)
+
+#b#
+
+```{r}
+colMeans(x=rockyDB[,2:6], na.rm = TRUE)
+```
+The mean of ratings of Rocky4 is highest, so it is best. However, the mean of ratings of Rocky5 is lowest, therefore it is worst.
+
+
+#c#
+```{r}
+RatedRocky4<-rockyDB[!is.na(rockyDB$Rocky4),]
+View(RatedRocky4)
+colMeans(x=RatedRocky4[,2:6], na.rm = TRUE)
+```
+The mean ratings of Rocky1, Rocky2 and Rocky 3 increased a lot, compared to the results of previous section. It is reasonable. People who rated Rocky 4 are very likely had watched previous three movies and spoken highly of them. That's why they are willing to watch the next one, Rocky 4. This data frame excludes people who watched previous three movies but felt disappointed about the movie and then stopped to support this Rocky series. Therefore, it is possible that a lot of low ratings are not available in the new data frame and only high ratings are left. Therefore, the means of previous three movies rise.
+
+#d#
+```{r}
+rockyDB_noNA<- na.omit(rockyDB)
+colMeans(x=rockyDB_noNA[,2:6], na.rm = TRUE)
+```
+It is common that data of some movies are missing. One explanation is that people do not watch the later Rocky movie after they watched the first or second one and felt disappointed about the series. Another thing could be that people just hate the movie and do not want to rate it. Therefore, ratings are missing. If we omit all the NA observations,the ones left are obervations who have watched every rockly movie. Obviously, this group likes Rocky Movie and thinks highly of the movie.As a result, the mean ratings of movies from this group is much higher than ratings from all of observations. The rating of Rocky 5 is corrlated with ratings of Rocky 2,Rocky 3 and Rocky 4, so the missing vlaue is not at random. Omitting all the NA observations, that is deleting the ratings from other groups such as people who dislike Rocky movie,  will cause bias.
+
+#e#
+
+
+#f#
+```{r}
+RatedRocky5<-rockyDB[!is.na(rockyDB$Rocky5),]
+RatedRocky5<-RatedRocky5 %>%
+mutate(isMissing1 = ifelse(is.na(Rocky1),1,0))%>%
+mutate(isMissing2 = ifelse(is.na(Rocky2),1,0))%>%
+mutate(isMissing3 = ifelse(is.na(Rocky3),1,0))%>%
+mutate(isMissing4 = ifelse(is.na(Rocky4),1,0))
+
+t.test(RatedRocky5[!complete.cases(RatedRocky5),]$Rocky5, RatedRocky5[complete.cases(RatedRocky5),]$Rocky5)
 ```
 
-## Including Plots
+p-value is than 5%, therefore, the mean ratings of Rocky5 from observations with missing data in  “Rocky1”,..., “Rocky4”  is statistically different from that from observations with no missing data.Therefore, we reach the conclusion that  having missing ratings in “Rocky1”,..., “Rocky4” is correlated with ratings for “Rocky5”. Since missing ratings is correlated with ratings for "Rocky 5", the missing is not at random. 
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
