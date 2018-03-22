@@ -2,11 +2,10 @@
 title: "case-2"
 output: html_document
 ---
-
-```{r setup, include=FALSE}
+```{r}
 library(readr)
 library(dplyr)
-
+library(broom)
 rockyDB <- read_csv("rockyDB.csv")
 ##Part 1
 ##a
@@ -15,9 +14,10 @@ colnames(rockyDB)[3] <- 'Rocky2'
 colnames(rockyDB)[4] <- 'Rocky3'
 colnames(rockyDB)[5] <- 'Rocky4'
 colnames(rockyDB)[6] <- 'Rocky5'
-
+```
 ##b
-
+There are several reasons why missing value is available. Some people did not watch that particular Rocky movie because they were not satisfied with previous Rocky movie or they just never heard of the movie series before. Some people may watch the movie, but disliked and did not want to rate it. We cannot use "0" to represent different attitudes from different groups of people. Besides, if we replace all missing value with 0, we will underestimate ratings, since the lowest rating people can give is 1.Therefore, representing missing value with "0" can cause problems for future analysis.
+```{r setup, include=FALSE}
 ##c
 rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, NA)
 rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, NA)
@@ -25,9 +25,6 @@ rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, NA)
 rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, NA)
 rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, NA)
 
-
-##Part 2
-##a
 
 ```
 
@@ -90,6 +87,56 @@ rockyDB_impute[ , 2:5][is.na(rockyDB_impute[ , 2:5])] = 0
 
 p-value is than 5%, therefore, the mean ratings of Rocky5 from observations with missing data in  “Rocky1”,..., “Rocky4”  is statistically different from that from observations with no missing data.Therefore, we reach the conclusion that  having missing ratings in “Rocky1”,..., “Rocky4” is correlated with ratings for “Rocky5”. Since missing ratings is correlated with ratings for "Rocky 5", the missing is not at random. 
 
+##Part 3
+```{r}
+fmla1<-Rocky5 ~ Rocky1 + Rocky2 + Rocky3 + Rocky4
+```
+
+##a
+```{r}
+model1<-lm(fmla1,rockyDB_noNA)
+```
+
+##b
+```{r}
+model2<-lm(fmla1,rockyDB_impute)
+cbind(model1$coefficients,model2$coefficients)
+```
+##c
+
+```{r}
+fmla2<-Rocky5 ~ Rocky1 + Rocky2 + Rocky3 + Rocky4 + isMissing1 + isMissing2 + isMissing3 + isMissing4
+model3<-lm(fmla2,rockyDB_impute)
+cbind(model2=summary(model2)$r.squared,model3=summary(model3)$r.squared)
+cbind(model2=summary(model2)$adj.r.squared,model3=summary(model3)$adj.r.squared)
+```
+```{r}
+rocky1Vec = c('','+Rocky1','+poly(Rocky1,2)')
+rocky2Vec = c('','+Rocky2','+poly(Rocky2,2)')
+rocky3Vec = c('','+Rocky3','+poly(Rocky3,2)')
+rocky4Vec = c('','+Rocky4','+poly(Rocky4,2)')
+
+formulaSet = paste('Rocky5~1',
+apply(expand.grid(rocky1Vec,rocky2Vec,rocky3Vec,rocky4Vec),1,paste,collapse=''))
+formulaSet
+modellist<-list()
+for (i in 1:16) {
+modellist[[i]]<-(lm(as.formula(formulaSet[i]),data=rockyDB_impute))
+}
+
+set.seed(1)  
+train.index <- sample(c(1:dim(rockyDB_impute)[1]), dim(rockyDB_impute)[1]*0.8)  
+train.df <- rockyDB_impute[train.index, ]
+valid.df <- rockyDB_impute[-train.index, ]
+mse <- function(x) 
+    mean(x$residuals^2)
+modellist2<-list()
+mselist<-list()
+for (i in 1:16) {
+modellist2[[i]]<-(lm(as.formula(formulaSet[i]),data=valid.df))
+mselist[[i]]<-mse(modellist2[[i]])
+}
 
 
+```
 
