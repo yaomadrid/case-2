@@ -83,6 +83,9 @@ mutate(isMissing3 = ifelse(is.na(Rocky3),1,0))%>%
 mutate(isMissing4 = ifelse(is.na(Rocky4),1,0))
 
 t.test(RatedRocky5[!complete.cases(RatedRocky5),]$Rocky5, RatedRocky5[complete.cases(RatedRocky5),]$Rocky5)
+
+rockyDB_impute<-RatedRocky5
+rockyDB_impute[ , 2:5][is.na(rockyDB_impute[ , 2:5])] = 0 
 ```
 
 p-value is than 5%, therefore, the mean ratings of Rocky5 from observations with missing data in  “Rocky1”,..., “Rocky4”  is statistically different from that from observations with no missing data.Therefore, we reach the conclusion that  having missing ratings in “Rocky1”,..., “Rocky4” is correlated with ratings for “Rocky5”. Since missing ratings is correlated with ratings for "Rocky 5", the missing is not at random. 
