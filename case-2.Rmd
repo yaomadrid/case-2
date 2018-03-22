@@ -16,9 +16,17 @@ colnames(rockyDB)[4] <- 'Rocky3'
 colnames(rockyDB)[5] <- 'Rocky4'
 colnames(rockyDB)[6] <- 'Rocky5'
 
-##b
 
-##c
+```
+
+b.
+There are several reasons why missing value is available. Some people did not watch that particular Rocky movie because they were not satisfied with previous Rocky movie or they just never heard of the movie series before. Some people may watch the movie, but disliked and did not want to rate it. We cannot use "0" to represent different attitudes from different groups of people. Besides, if we replace all missing value with 0, we will underestimate ratings, since the lowest rating people can give is 1.Therefore, representing missing value with "0" can cause problems for future analysis.
+
+
+
+
+```{r}
+#c
 rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, NA)
 rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, NA)
 rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, NA)
@@ -26,9 +34,11 @@ rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, NA)
 rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, NA)
 
 
-##Part 2
-##a
+```
 
+
+
+`
 ```
 
 
@@ -61,7 +71,7 @@ RatedRocky4<-rockyDB[!is.na(rockyDB$Rocky4),]
 View(RatedRocky4)
 colMeans(x=RatedRocky4[,2:6], na.rm = TRUE)
 ```
-The mean ratings of Rocky1, Rocky2 and Rocky 3 increased a lot, compared to the results of previous section. It is reasonable. People who rated Rocky 4 are very likely had watched previous three movies and spoken highly of them. That's why they are willing to watch the next one, Rocky 4. This data frame excludes people who watched previous three movies but felt disappointed about the movie and then stopped to support this Rocky series. Therefore, it is possible that a lot of low ratings are not available in the new data frame and only high ratings are left. Therefore, the means of previous three movies rise.
+The mean ratings of Rocky1, Rocky2 and Rocky 3 increased a lot, compared to the results of previous section. It is reasonable. People who rated Rocky 4  very likely had watched previous three movies and spoken highly of them. That's why they are willing to watch the next one, Rocky 4. This data frame excludes people who watched previous three movies but felt disappointed about the movie and then stopped to support this Rocky series. Therefore, it is possible that a lot of low ratings are not available in the new data frame and only high ratings are left. Therefore, the means of previous three movies rise.
 
 #d#
 ```{r}
@@ -71,7 +81,7 @@ colMeans(x=rockyDB_noNA[,2:6], na.rm = TRUE)
 It is common that data of some movies are missing. One explanation is that people do not watch the later Rocky movie after they watched the first or second one and felt disappointed about the series. Another thing could be that people just hate the movie and do not want to rate it. Therefore, ratings are missing. If we omit all the NA observations,the ones left are obervations who have watched every rockly movie. Obviously, this group likes Rocky Movie and thinks highly of the movie.As a result, the mean ratings of movies from this group is much higher than ratings from all of observations. The rating of Rocky 5 is corrlated with ratings of Rocky 2,Rocky 3 and Rocky 4, so the missing vlaue is not at random. Omitting all the NA observations, that is deleting the ratings from other groups such as people who dislike Rocky movie,  will cause bias.
 
 #e#
-
+Even using mean, median and mode to "fill in" the missing data can still cause bias in our case. First of all, over 90 percent observations have missing data. 
 
 #f#
 ```{r}
