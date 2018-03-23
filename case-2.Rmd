@@ -2,57 +2,42 @@
 title: "case-2"
 output: html_document
 ---
+
+#Part 1
 ```{r}
 library(readr)
 library(dplyr)
 library(broom)
 rockyDB <- read_csv("rockyDB.csv")
-##Part 1
-##a
+
+#a
 colnames(rockyDB)[2] <- 'Rocky1'
 colnames(rockyDB)[3] <- 'Rocky2'
 colnames(rockyDB)[4] <- 'Rocky3'
 colnames(rockyDB)[5] <- 'Rocky4'
 colnames(rockyDB)[6] <- 'Rocky5'
 
-
-
 ```
 
-b.
+#b
 There are several reasons why missing value is available. Some people did not watch that particular Rocky movie because they were not satisfied with previous Rocky movie or they just never heard of the movie series before. Some people may watch the movie, but disliked and did not want to rate it. We cannot use "0" to represent different attitudes from different groups of people. Besides, if we replace all missing value with 0, we will underestimate ratings, since the lowest rating people can give is 1.Therefore, representing missing value with "0" can cause problems for future analysis.
 
 
-
-
-```{r}
 #c
-
-```
-##b
-There are several reasons why missing value is available. Some people did not watch that particular Rocky movie because they were not satisfied with previous Rocky movie or they just never heard of the movie series before. Some people may watch the movie, but disliked and did not want to rate it. We cannot use "0" to represent different attitudes from different groups of people. Besides, if we replace all missing value with 0, we will underestimate ratings, since the lowest rating people can give is 1.Therefore, representing missing value with "0" can cause problems for future analysis.
-```{r setup, include=FALSE}
-##c
-
+```{r }
 rockyDB$Rocky1<-replace(rockyDB$Rocky1,rockyDB$Rocky1==0, NA)
 rockyDB$Rocky2<-replace(rockyDB$Rocky2,rockyDB$Rocky2==0, NA)
 rockyDB$Rocky3<-replace(rockyDB$Rocky3,rockyDB$Rocky3==0, NA)
 rockyDB$Rocky4<-replace(rockyDB$Rocky4,rockyDB$Rocky4==0, NA)
 rockyDB$Rocky5<-replace(rockyDB$Rocky5,rockyDB$Rocky5==0, NA)
 
-
-
 ```
 
-
-
-`
 =======
 
-
-
 Part 2
-#a#
+
+#a
 ```{r}
 
 install.packages("corrplot")
@@ -65,16 +50,14 @@ According to the correlation plot, Rocky2, Rocky 3 and Rocky 4 are within a clus
 Therefore, these movies are most similar. Also, the correlation coefficient of ratings between these three movies are above 0.6.
 Rocky 1 is most different from the others, the coefficients of ratings between Rocky 1 and other movies are relative low, compared with others. And the correlation plot also indicates the same conclution.
 
-
-#b#
+#b
 
 ```{r}
 colMeans(x=rockyDB[,2:6], na.rm = TRUE)
 ```
 The mean of ratings of Rocky4 is highest, so it is best. However, the mean of ratings of Rocky5 is lowest, therefore it is worst.
 
-
-#c#
+#c
 ```{r}
 RatedRocky4<-rockyDB[!is.na(rockyDB$Rocky4),]
 View(RatedRocky4)
@@ -82,17 +65,18 @@ colMeans(x=RatedRocky4[,2:6], na.rm = TRUE)
 ```
 The mean ratings of Rocky1, Rocky2 and Rocky 3 increased a lot, compared to the results of previous section. It is reasonable. People who rated Rocky 4  very likely had watched previous three movies and spoken highly of them. That's why they are willing to watch the next one, Rocky 4. This data frame excludes people who watched previous three movies but felt disappointed about the movie and then stopped to support this Rocky series. Therefore, it is possible that a lot of low ratings are not available in the new data frame and only high ratings are left. Therefore, the means of previous three movies rise.
 
-#d#
+#d
 ```{r}
 rockyDB_noNA<- na.omit(rockyDB)
 colMeans(x=rockyDB_noNA[,2:6], na.rm = TRUE)
 ```
 It is common that data of some movies are missing. One explanation is that people do not watch the later Rocky movie after they watched the first or second one and felt disappointed about the series. Another thing could be that people just hate the movie and do not want to rate it. Therefore, ratings are missing. If we omit all the NA observations,the ones left are obervations who have watched every rockly movie. Obviously, this group likes Rocky Movie and thinks highly of the movie.As a result, the mean ratings of movies from this group is much higher than ratings from all of observations. The rating of Rocky 5 is corrlated with ratings of Rocky 2,Rocky 3 and Rocky 4, so the missing vlaue is not at random. Omitting all the NA observations, that is deleting the ratings from other groups such as people who dislike Rocky movie,  will cause bias.
 
-#e#
-Even using mean, median and mode to "fill in" the missing data can still cause bias in our case. First of all, over 90 percent observations have missing data. 
+#e
 
-#f#
+The mean, median and mode are the three measures of central tendency. Using them to replace missing value will reduce the variance and standard deviation of the data. In Rocky movie data, over 90 percent observations have missing data. Using one single value to represent so many missing value obviously will cause bias.
+
+#f
 ```{r}
 RatedRocky5<-rockyDB[!is.na(rockyDB$Rocky5),]
 RatedRocky5<-RatedRocky5 %>%
@@ -112,7 +96,7 @@ rockyDB_impute<-RatedRocky5
 rockyDB_impute[ , 2:5][is.na(rockyDB_impute[ , 2:5])] = 0 
 ```
 
-The p-value in cor.test(isMissing1, Rocky5) is 87.8%, much higher than 5%, but the p-value in other three tests are all smaller than 5%. Therefore, having missing ratings in Rocky1 is not statistically significant correlated with ratings for Rocky5 and they are missing at random. Deleting the missing records and imputation can be two useful approaches to deal with the missing value. There are statistically significant correlation between missing ratings in Rocky2, Rocky3 and Rocky4 and ratings for Rocky5. The missing are not missing at random, so deleting missing ratings in these three movies will cause bias. In order to avoid a reduction in sample size, we decide to replace missing values with 0 in all previous four Rocky movies and use variables "is Missing 1"..."isMissing 4" to capture how the values that are missing are different than the ones that aren’t.
+The p-value in cor.test(isMissing1, Rocky5) is 87.8%, much higher than 5%, but the p-value in other three tests are all smaller than 5%. Therefore, having missing ratings in Rocky1 is not statistically significant correlated with ratings for Rocky5 and they are missing at random. Deleting the missing records and imputation can be two useful approaches to deal with the missing value. There are statistically significant correlation between missing ratings in Rocky2, Rocky3 and Rocky4 and ratings for Rocky5. They are not missing at random, so deleting missing ratings in these three movies will cause bias. In order to avoid a reduction in sample size, we decide to replace missing values with 0 in all previous four Rocky movies and use variables "is Missing 1"..."isMissing 4" to capture how the values that are missing are different than the ones that aren’t.
 
 
 ##Part 3
