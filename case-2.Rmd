@@ -107,13 +107,16 @@ fmla1<-Rocky5 ~ Rocky1 + Rocky2 + Rocky3 + Rocky4
 ##a
 ```{r}
 model1<-lm(fmla1,rockyDB_noNA)
+summary(model1)
 ```
-
+We firstly created a model of Rocky5 with respect of Rocky1, Rocky2, Rocky3 and Rocky4 within rockyDB_noNA dataset. We could see that the rating of Rocky1, Rocky2, Rocky3 and Rocky4 all have significant influence on the rating of Rocky5, as the p-values of their coefficient are all less than 0.05. However, the rating of Rocky1 has a negative effect on the rating of Rocky5 while the rest all have a positive effects, according to their predicted coefficients. This model's R squared is 0.4164 and adjusted R squared is 0.4159. 
 ##b
 ```{r}
 model2<-lm(fmla1,rockyDB_impute)
+summary(model2)
 cbind(model1$coefficients,model2$coefficients)
 ```
+Then we created a same regression but with a different dataset, rockyDB_impute. We notice that only the rating of Rocky3 and Rocky4 have positive imfluence on the rating of Rocky5 as only ther p-values are less than 0.05. This model's R squared is 0.1979 while adjusted R squared is 0.1975. Altough the former model has a bigger R squared, it is biased due to the missing data we have talked above. Meanwhile we could compare the coefficients of these variables in these two models. We could see that the absolute value of variable coefficients in the first model are all bigger than in the second model but they are all in the same symbol. This is to say, these variables all have same effects on our dependent variable but the extent of these influences are different. Additionally, the significances of these variable are quite different under these two models. All the variables are significant in the first model while only Rocky3 and Rocky4 are significant in the second model.
 ##c
 
 ```{r}
@@ -122,18 +125,20 @@ model3<-lm(fmla2,rockyDB_impute)
 cbind(model2=summary(model2)$r.squared,model3=summary(model3)$r.squared)
 cbind(model2=summary(model2)$adj.r.squared,model3=summary(model3)$adj.r.squared)
 ```
+Then we added variables to capture the difference between missing data and nonmissing data. Then we found adding these variables increased both R squared and adjusted R squared from 0.198 to 0.37. 
+
 ```{r}
 rocky1Vec = c('+Rocky1','+poly(Rocky1,2)')
-rocky2Vec = c('+Rocky2','+poly(Rocky2,2)')
-rocky3Vec = c('+Rocky3','+poly(Rocky3,2)')
-rocky4Vec = c('+Rocky4','+poly(Rocky4,2)')
+rocky2Vec = c('+Rocky2','+poly(Rocky2,2)','+isMissing2')
+rocky3Vec = c('+Rocky3','+poly(Rocky3,2)','+isMissing3')
+rocky4Vec = c('+Rocky4','+poly(Rocky4,2)','+isMissing4')
 
 formulaSet = paste('Rocky5~1',
 apply(expand.grid(rocky1Vec,rocky2Vec,rocky3Vec,rocky4Vec),1,paste,collapse=''))
 formulaSet
 
 modellist<-list()
-for (i in 1:16) {
+for (i in 1:54) {
 modellist[[i]]<-(lm(as.formula(formulaSet[i]),data=rockyDB_impute))
 }
 
@@ -145,16 +150,15 @@ valid.df <- rockyDB_impute[-train.index, ]
 
 modellist2<-list()
 mselist<-list()
-for (i in 1:16) {
+
+for (i in 1:54) {
 modellist2[[i]]<-(lm(as.formula(formulaSet[i]),data=train.df))
 mselist[[i]]<-mean((valid.df$Rocky5- predict(modellist2[[i]],newdata = valid.df))^2)
 }
-
 mselist
-
-
-
-
-
+modellist2[[30]]
+summary(modellist2[[30]])
 ```
+Then we created 4 vectors to automatically generate different models. These vectors contains following variables: Rocky1, poly(Rocky1, 2), Rocky2, poly(Rocky2,2), isMissing2, Rocky3, poly(Rocky3,2), isMissing3, Rocky4, poly(Rocky4,2), isMissing4. We created 54 models from these variables. The reason why we include polynominal variables in our model is because we want to test whether there is no-linear correlation between rating of Rocky5 with ratings of other movies. Besides, we also include isMissing variables indicating the missing value. As we talked above, these missing value is not missing at random and is not independent from our dependent variable. Therefore, we included a series of isMissing variables. However, we did not include isMissing1 as we notice we cannot reject the independence between isMissing1 and Rocky5. Thus we created 54 models with rockyDB_impute and store the models as modellist1. Then we seperated our original dataset into training set and validation set, and used the same formularset to generate models within the training set. We utilized training data to generate models and made predictions for validation set. We firstly generated 54 models with training data and store it as modellist2. Then we made predictions based on models in modellist2 and calculated out of sample MSE of these models. We found the 30th model in the modellist2 has the least MSE, 1.051784. 
 
+The regression of the best model (with least MSE) is Rocky5 = 2.9826 + 1.3575Rocky1 + 8.6979Rocky1^2 + 0.1648isMissing2 + 22.3820Rocky3 + 20.2137Rocky3^2 + 25.8683Rocky4 + 19.3670Rocky4^2. All the variables' coefficients are significant except isMissing2 and R squared is around 0.35. We could conclude that all these significant variables have positive effects on rating of Rocky5 as their coefficients are bigger than 0. And we could also notice Rocky3, Rocky3^2, Rocky4 and Rocky4^2 have greater impact on our dependent variable than the rest variables as their coefficients are around 20, which is a comparatively big number. 
